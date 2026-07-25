@@ -1,0 +1,6 @@
+{
+  "name": "Simulasi Barrier Gate Parkir RFID",
+  "description": "Simulasi 3D interaktif barrier gate parkir dengan pemindai RFID, sensor loop detector induksi, pergerakan mobil, dan indikator status otomatis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
