@@ -352,22 +352,22 @@ void loop() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
-      <div className="bg-slate-900 border border-slate-700 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fade-in">
+      <div className="bg-white border border-pink-100 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="p-4 border-b border-slate-800 bg-slate-950 flex items-center justify-between">
+        <div className="p-4 px-6 border-b border-pink-100 bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-cyan-400">
+            <div className="p-2 bg-pink-100 text-pink-600 rounded-xl">
               <Cpu className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-                <span>Kode Firmware Arduino C++ (C++ Sketch .ino)</span>
-                <span className="text-[10px] font-mono bg-cyan-950 text-cyan-400 border border-cyan-800 px-2 py-0.5 rounded-full">
-                  v2.4.0
+              <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                <span>Firmware Arduino C++ (Sketch .ino)</span>
+                <span className="text-[10px] font-bold bg-pink-100 text-pink-700 border border-pink-200 px-2 py-0.5 rounded-full">
+                  v2.4.0 Cute
                 </span>
               </h3>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-slate-500">
                 Kode program lengkap siap di-upload ke Arduino Uno / Nano / ESP32 untuk mengontrol Barrier Gate, RFID, & Dual Loop Detector.
               </p>
             </div>
@@ -376,29 +376,29 @@ void loop() {
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopy}
-              className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-lg transition-all flex items-center gap-1.5 shadow-lg shadow-cyan-600/20 active:scale-95"
+              className="px-3.5 py-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-md shadow-pink-200 active:scale-95"
             >
-              {copied ? <Check className="w-4 h-4 text-slate-950" /> : <Copy className="w-4 h-4 text-slate-950" />}
-              <span>{copied ? 'Tersalin!' : 'Salin Kode .ino'}</span>
+              {copied ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4 text-white" />}
+              <span>{copied ? 'Tersalin!' : 'Salin .ino'}</span>
             </button>
 
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-all"
+              className="p-1.5 text-slate-400 hover:text-rose-500 bg-white hover:bg-rose-50 border border-slate-200 rounded-full transition-all"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-slate-800 bg-slate-950/60 px-4 font-mono text-xs">
+        <div className="flex border-b border-pink-100 bg-pink-50/20 px-6 font-mono text-xs">
           <button
             onClick={() => setActiveTab('code')}
-            className={`py-2.5 px-4 font-bold border-b-2 flex items-center gap-2 transition-all ${
+            className={`py-3 px-4 font-bold border-b-2 flex items-center gap-2 transition-all ${
               activeTab === 'code'
-                ? 'border-cyan-400 text-cyan-300 bg-slate-900/60'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-pink-500 text-pink-700 bg-white shadow-xs'
+                : 'border-transparent text-slate-500 hover:text-pink-600'
             }`}
           >
             <FileCode className="w-4 h-4" />
@@ -407,22 +407,22 @@ void loop() {
 
           <button
             onClick={() => setActiveTab('wiring')}
-            className={`py-2.5 px-4 font-bold border-b-2 flex items-center gap-2 transition-all ${
+            className={`py-3 px-4 font-bold border-b-2 flex items-center gap-2 transition-all ${
               activeTab === 'wiring'
-                ? 'border-cyan-400 text-cyan-300 bg-slate-900/60'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-pink-500 text-pink-700 bg-white shadow-xs'
+                : 'border-transparent text-slate-500 hover:text-pink-600'
             }`}
           >
             <Layers className="w-4 h-4" />
-            <span>Skema Pinout & Wiring Hardware</span>
+            <span>Skema Pinout & Wiring</span>
           </button>
 
           <button
             onClick={() => setActiveTab('flow')}
-            className={`py-2.5 px-4 font-bold border-b-2 flex items-center gap-2 transition-all ${
+            className={`py-3 px-4 font-bold border-b-2 flex items-center gap-2 transition-all ${
               activeTab === 'flow'
-                ? 'border-cyan-400 text-cyan-300 bg-slate-900/60'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-pink-500 text-pink-700 bg-white shadow-xs'
+                : 'border-transparent text-slate-500 hover:text-pink-600'
             }`}
           >
             <ShieldCheck className="w-4 h-4" />
@@ -431,25 +431,25 @@ void loop() {
         </div>
 
         {/* Content Body */}
-        <div className="p-4 overflow-y-auto flex-1 bg-slate-950">
+        <div className="p-6 overflow-y-auto flex-1 bg-slate-50/50">
           {activeTab === 'code' && (
             <div className="relative">
-              <pre className="font-mono text-[11px] leading-relaxed text-cyan-200 bg-slate-900 p-4 rounded-xl border border-slate-800 overflow-x-auto selection:bg-cyan-800 selection:text-white">
+              <pre className="font-mono text-[11px] leading-relaxed text-slate-800 bg-white p-5 rounded-2xl border border-pink-100 shadow-sm overflow-x-auto selection:bg-pink-100">
                 <code>{arduinoCode}</code>
               </pre>
             </div>
           )}
 
           {activeTab === 'wiring' && (
-            <div className="flex flex-col gap-4 text-xs text-slate-300 leading-relaxed">
-              <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl">
-                <h4 className="font-bold text-cyan-400 mb-2 uppercase tracking-wider flex items-center gap-2">
-                  <Zap className="w-4 h-4" />
+            <div className="flex flex-col gap-4 text-xs text-slate-700 leading-relaxed">
+              <div className="p-5 bg-white border border-pink-100 rounded-2xl shadow-xs">
+                <h4 className="font-bold text-pink-600 mb-3 uppercase tracking-wider flex items-center gap-2 text-xs">
+                  <Zap className="w-4 h-4 text-pink-500" />
                   <span>Daftar Sambungan Pin Hardware Arduino Uno</span>
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-[11px] text-slate-300">
-                  <div className="p-3 bg-slate-950 border border-slate-800 rounded-lg">
-                    <div className="text-amber-400 font-bold mb-1">1. RFID MFRC522 (13.56MHz)</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-[11px]">
+                  <div className="p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-xl text-slate-700">
+                    <div className="text-amber-800 font-bold mb-1">1. RFID MFRC522 (13.56MHz)</div>
                     <div>• SDA (SS) -&gt; Pin D10</div>
                     <div>• SCK -&gt; Pin D13</div>
                     <div>• MOSI -&gt; Pin D11</div>
@@ -459,22 +459,22 @@ void loop() {
                     <div>• GND -&gt; GND</div>
                   </div>
 
-                  <div className="p-3 bg-slate-950 border border-slate-800 rounded-lg">
-                    <div className="text-cyan-400 font-bold mb-1">2. Modul Inductive Loop Detector</div>
+                  <div className="p-3.5 bg-sky-50/70 border border-sky-200/80 rounded-xl text-slate-700">
+                    <div className="text-sky-800 font-bold mb-1">2. Modul Inductive Loop Detector</div>
                     <div>• Loop 1 Relay Out (Presence) -&gt; Pin A0 (NO to GND)</div>
                     <div>• Loop 2 Relay Out (Safety/Passage) -&gt; Pin A1 (NO to GND)</div>
                     <div>• Modul Power VCC -&gt; 12V / 24V DC External Power</div>
                   </div>
 
-                  <div className="p-3 bg-slate-950 border border-slate-800 rounded-lg">
-                    <div className="text-emerald-400 font-bold mb-1">3. Servo Motor / Relay Barrier Gate</div>
+                  <div className="p-3.5 bg-emerald-50/70 border border-emerald-200/80 rounded-xl text-slate-700">
+                    <div className="text-emerald-800 font-bold mb-1">3. Servo Motor / Relay Barrier Gate</div>
                     <div>• PWM Signal Control -&gt; Pin D6</div>
                     <div>• Servo VCC -&gt; 5V External Adapter (Min 2A)</div>
                     <div>• GND -&gt; Shared Common GND Arduino</div>
                   </div>
 
-                  <div className="p-3 bg-slate-950 border border-slate-800 rounded-lg">
-                    <div className="text-purple-400 font-bold mb-1">4. Display LCD 16x2 I2C & Indicator</div>
+                  <div className="p-3.5 bg-purple-50/70 border border-purple-200/80 rounded-xl text-slate-700">
+                    <div className="text-purple-800 font-bold mb-1">4. Display LCD 16x2 I2C & Indicator</div>
                     <div>• LCD SDA -&gt; Pin A4</div>
                     <div>• LCD SCL -&gt; Pin A5</div>
                     <div>• Buzzer Positive -&gt; Pin D5</div>
@@ -484,34 +484,34 @@ void loop() {
                 </div>
               </div>
 
-              <div className="p-3 bg-amber-950/40 border border-amber-800/80 rounded-xl text-amber-200">
+              <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl text-amber-900 text-xs">
                 ⚠️ <strong>Catatan Penting Pemasangan:</strong> Pastikan seluruh Ground (GND) dari Arduino, Power Supply Servo, dan Modul Loop Detector terhubung bersama (Common Ground) untuk menghindari noise sinyal listrik.
               </div>
             </div>
           )}
 
           {activeTab === 'flow' && (
-            <div className="flex flex-col gap-4 text-xs text-slate-300 leading-relaxed">
-              <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-3">
-                <h4 className="font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4" />
+            <div className="flex flex-col gap-4 text-xs text-slate-700 leading-relaxed">
+              <div className="p-5 bg-white border border-pink-100 rounded-2xl shadow-xs space-y-3">
+                <h4 className="font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
                   <span>Prinsip Keamanan Sistem Barrier Gate Otomatis</span>
                 </h4>
                 <p>
                   Sistem ini menggunakan algoritma state-machine dengan proteksi ganda (Double Inductive Loop Security) untuk mencegah mobil tertimpa palang pintu parkir (Anti-Crush Protection):
                 </p>
-                <ul className="list-disc pl-5 space-y-1.5 text-[11px] text-slate-300">
+                <ul className="list-disc pl-5 space-y-2 text-[11px] text-slate-600">
                   <li>
-                    <strong className="text-cyan-400">Anti-Tap Tanpa Mobil:</strong> Kartu RFID tidak akan diproses oleh reader jika Loop Detector 1 (Presence) tidak mendeteksi massa logam mobil asli. Ini mencegah pejalan kaki asal tap kartu.
+                    <strong className="text-sky-700">Anti-Tap Tanpa Mobil:</strong> Kartu RFID tidak akan diproses oleh reader jika Loop Detector 1 (Presence) tidak mendeteksi massa logam mobil asli. Ini mencegah pejalan kaki asal tap kartu.
                   </li>
                   <li>
-                    <strong className="text-amber-400">Safety Lock Under Gate:</strong> Saat mobil berada di bawah palang (Loop Detector 2 aktif), sistem memblokir perintah tutup palang dan mengunci posisi servo tetap 90 derajat.
+                    <strong className="text-amber-800">Safety Lock Under Gate:</strong> Saat mobil berada di bawah palang (Loop Detector 2 aktif), sistem memblokir perintah tutup palang dan mengunci posisi servo tetap 90 derajat.
                   </li>
                   <li>
-                    <strong className="text-emerald-400">Interrupt Auto-Reopen:</strong> Jika palang sedang proses bergerak turun dan tiba-tiba Loop Detector 2 mendeteksi halangan/ekor kendaraan, palang langsung BUKA KEMBALI seketika.
+                    <strong className="text-emerald-700">Interrupt Auto-Reopen:</strong> Jika palang sedang proses bergerak turun dan tiba-tiba Loop Detector 2 mendeteksi halangan/ekor kendaraan, palang langsung BUKA KEMBALI seketika.
                   </li>
                   <li>
-                    <strong className="text-purple-400">Auto Close Setelah Lolos:</strong> Palang pintu hanya akan menutup otomatis 500ms setelah sensor Loop Detector 2 lepas/clear total.
+                    <strong className="text-purple-700">Auto Close Setelah Lolos:</strong> Palang pintu hanya akan menutup otomatis 500ms setelah sensor Loop Detector 2 lepas/clear total.
                   </li>
                 </ul>
               </div>
@@ -520,13 +520,13 @@ void loop() {
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-slate-800 bg-slate-950 flex items-center justify-between text-[11px] font-mono text-slate-500">
-          <span>Target Platform: Arduino IDE 2.x (Compatible with ESP32 / Arduino Uno / STM32)</span>
+        <div className="p-4 px-6 border-t border-pink-100 bg-pink-50/40 flex items-center justify-between text-[11px] font-mono text-slate-500">
+          <span>Target: Arduino IDE 2.x (ESP32 / Uno / STM32)</span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-lg transition-all"
+            className="px-5 py-2 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 hover:from-pink-600 hover:to-indigo-600 text-white font-bold rounded-xl transition-all shadow-md shadow-pink-200 active:scale-95"
           >
-            Tutup
+            Tutup Jendela ✨
           </button>
         </div>
       </div>

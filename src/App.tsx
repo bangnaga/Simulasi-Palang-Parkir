@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import confetti from 'canvas-confetti';
+import { X, SlidersHorizontal, Play, RotateCcw } from 'lucide-react';
 import {
   CameraPreset,
   EnvironmentSetting,
@@ -10,14 +11,14 @@ import {
   VehicleType
 } from './types';
 import { soundManager } from './lib/audio';
+// App.tsx
 import { HeaderNav } from './components/HeaderNav';
 import { Barrier3DCanvas } from './components/Barrier3DCanvas';
 import { ControlPanel } from './components/ControlPanel';
-import { TelemetryLog } from './components/TelemetryLog';
 import { LoopDetectorInfoModal } from './components/LoopDetectorInfoModal';
 import { ArduinoCodeModal } from './components/ArduinoCodeModal';
 
-// Sample RFID Cards
+// Sample Cheerful RFID Cards
 const INITIAL_RFID_CARDS: RfidCard[] = [
   {
     id: 'c1',
@@ -26,41 +27,55 @@ const INITIAL_RFID_CARDS: RfidCard[] = [
     type: 'Member VIP',
     balance: 150000,
     valid: true,
-    color: '#1e3a8a'
+    color: '#8b5cf6',
+    avatarIcon: '👑'
   },
   {
     id: 'c2',
     name: 'Siti Rahma',
     cardNo: '5512-8801',
     type: 'E-Money',
-    balance: 50000,
+    balance: 75000,
     valid: true,
-    color: '#047857'
+    color: '#06b6d4',
+    avatarIcon: '🌱'
   },
   {
     id: 'c3',
-    name: 'Joko Widodo',
+    name: 'Citra Kirana',
     cardNo: '1092-3321',
     type: 'Flazz',
-    balance: 2000, // Insufficient for Rp 5.000 fee
-    valid: false,
-    color: '#b91c1c'
+    balance: 50000,
+    valid: true,
+    color: '#ec4899',
+    avatarIcon: '🌸'
   },
   {
     id: 'c4',
-    name: 'Pengunjung Bebas',
+    name: 'Doni Pratama',
+    cardNo: '4421-9988',
+    type: 'Brizzi',
+    balance: 25000,
+    valid: true,
+    color: '#f59e0b',
+    avatarIcon: '☀️'
+  },
+  {
+    id: 'c5',
+    name: 'Tamu Tanpa Izin',
     cardNo: '9900-0000',
     type: 'Kartu Kadaluarsa',
-    balance: 0,
+    balance: 1500,
     valid: false,
-    color: '#475569'
+    color: '#f43f5e',
+    avatarIcon: '⛔'
   }
 ];
 
 export default function App() {
   // State variables
   const [vehicleZPos, setVehicleZPos] = useState<number>(-16.0);
-  const [vehicleType, setVehicleType] = useState<VehicleType>('sedan');
+  const [vehicleType, setVehicleType] = useState<VehicleType>('suv');
   const [rfidCards, setRfidCards] = useState<RfidCard[]>(INITIAL_RFID_CARDS);
   const [selectedCard, setSelectedCard] = useState<RfidCard>(INITIAL_RFID_CARDS[0]);
 
@@ -96,6 +111,7 @@ export default function App() {
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState<boolean>(false);
   const [isArduinoModalOpen, setIsArduinoModalOpen] = useState<boolean>(false);
+  const [isMobileSheetOpen, setIsMobileSheetOpen] = useState<boolean>(false);
 
   const [config, setConfig] = useState<SystemConfig>({
     gateSpeedSec: 1.5,
@@ -152,6 +168,48 @@ export default function App() {
       'Sistem standby menunggu kedatangan kendaraan di Loop 1.'
     );
   }, [addTelemetryEvent]);
+
+  // Vehicle Engine Sound & Entry/Exit Chime Effect on Z Position change
+  const prevVehicleZRef = useRef<number>(vehicleZPos);
+  const engineStopTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const hasTriggeredEntryChimeRef = useRef<boolean>(false);
+  const hasTriggeredExitChimeRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    const delta = Math.abs(vehicleZPos - prevVehicleZRef.current);
+    if (delta > 0.01) {
+      soundManager.startEngineSound();
+      soundManager.updateEnginePitch(delta * 15);
+
+      if (engineStopTimerRef.current) clearTimeout(engineStopTimerRef.current);
+      engineStopTimerRef.current = setTimeout(() => {
+        soundManager.stopEngineSound();
+      }, 400);
+    }
+    prevVehicleZRef.current = vehicleZPos;
+
+    // Entry chime when vehicle enters parking area (crossing gate Z=0 with open gate)
+    if (vehicleZPos >= 0.5 && vehicleZPos <= 2.0 && gateAngle > 50 && !hasTriggeredEntryChimeRef.current) {
+      hasTriggeredEntryChimeRef.current = true;
+      hasTriggeredExitChimeRef.current = false;
+      soundManager.playEntryExitChime(true);
+      addTelemetryEvent('success', 'VEHICLE', 'Kendaraan berhasil masuk area parkir.');
+    }
+
+    // Exit chime when vehicle exits parking area (crossing Z >= 10)
+    if (vehicleZPos >= 10.0 && !hasTriggeredExitChimeRef.current) {
+      hasTriggeredExitChimeRef.current = true;
+      hasTriggeredEntryChimeRef.current = false;
+      soundManager.playEntryExitChime(false);
+      addTelemetryEvent('success', 'VEHICLE', 'Kendaraan berhasil keluar area parkir.');
+    }
+
+    // Reset chimes when reset far back
+    if (vehicleZPos <= -10) {
+      hasTriggeredEntryChimeRef.current = false;
+      hasTriggeredExitChimeRef.current = false;
+    }
+  }, [vehicleZPos, gateAngle, addTelemetryEvent]);
 
   // --------------------------------------------------------------------------
   // SENSOR THRESHOLD LOGIC (Position Z listener)
@@ -494,8 +552,8 @@ export default function App() {
     statusText = 'PRESENSI: Mobil di Loop 1 (Menunggu RFID)';
     statusColor = 'text-cyan-400';
   } else if (gateState === 'OPENING') {
-    statusText = 'MOTOR: Membuka Palang...';
-    statusColor = 'text-amber-400 animate-pulse';
+    statusText = 'MOTOR: Membuka Palang... (Lampu Hijau)';
+    statusColor = 'text-emerald-400 animate-pulse font-bold';
   } else if (gateState === 'OPEN' && !loop2Active) {
     statusText = 'AKSES DIBUKA: Silakan Melintas';
     statusColor = 'text-emerald-400 font-bold';
@@ -508,7 +566,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-slate-950 text-slate-100 overflow-hidden font-sans">
+    <div className="flex flex-col h-screen w-screen bg-gradient-to-br from-pink-50/90 via-purple-50/40 via-sky-50/50 to-pink-50/80 text-slate-800 overflow-hidden font-sans">
       {/* Top Header Navigation */}
       <HeaderNav
         systemStateLabel={statusText}
@@ -519,39 +577,100 @@ export default function App() {
         onOpenArduinoModal={() => setIsArduinoModalOpen(true)}
       />
 
-      {/* Main Grid Workspace */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 overflow-hidden">
-        {/* Left / Top: 3D Babylon Viewport (8 Columns on desktop) */}
-        <div className="lg:col-span-8 flex flex-col gap-4 h-full min-h-[400px] lg:min-h-0">
-          <div className="flex-1 relative">
-            <Barrier3DCanvas
-              vehicleZPos={vehicleZPos}
-              vehicleType={vehicleType}
-              gateState={gateState}
-              gateAngle={gateAngle}
-              cameraPreset={cameraPreset}
-              environmentMode={environmentMode}
-              loop1Active={loop1Active}
-              loop2Active={loop2Active}
-              rfidDisplayText={rfidDisplay}
-              isTappingCard={isTappingCard}
-              onSceneReady={() => {}}
-            />
-          </div>
+      {/* Main Workspace (Edge-to-Edge on mobile, beautiful side-by-side grid on desktop) */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 p-0 lg:p-3.5 gap-0 lg:gap-3.5 overflow-hidden relative">
+        {/* Spacious 3D Babylon Viewport - Full bleed on mobile! */}
+        <div className="lg:col-span-8 h-full w-full min-h-0 relative rounded-none lg:rounded-3xl overflow-hidden border-0 lg:border border-pink-200/80 bg-white shadow-none lg:shadow-sm flex flex-col">
+          <Barrier3DCanvas
+            vehicleZPos={vehicleZPos}
+            vehicleType={vehicleType}
+            gateState={gateState}
+            gateAngle={gateAngle}
+            cameraPreset={cameraPreset}
+            setCameraPreset={setCameraPreset}
+            environmentMode={environmentMode}
+            loop1Active={loop1Active}
+            loop2Active={loop2Active}
+            rfidDisplayText={rfidDisplay}
+            isTappingCard={isTappingCard}
+            onSceneReady={() => {}}
+          />
 
-          {/* Bottom Telemetry Log Panel (Height-constrained) */}
-          <div className="h-44 shrink-0">
-            <TelemetryLog
-              events={telemetryEvents}
-              onClearLogs={() => setTelemetryEvents([])}
-              loop1Active={loop1Active}
-              loop2Active={loop2Active}
-            />
+          {/* Minimalist Floating Action Dock for Mobile (< lg) */}
+          <div className="lg:hidden absolute bottom-3 left-2.5 right-2.5 flex flex-col gap-1.5 pointer-events-none z-30">
+            {/* Quick Vehicle Distance Scrub Bar */}
+            <div className="flex items-center justify-between bg-white/90 backdrop-blur-md px-2.5 py-1.5 rounded-2xl border border-pink-200/80 shadow-md pointer-events-auto">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setVehicleZPos(Math.max(-15, Math.round((vehicleZPos - 1.5) * 10) / 10))}
+                  className="w-7 h-7 rounded-xl bg-pink-100 hover:bg-pink-200 active:scale-90 text-pink-700 font-black text-xs flex items-center justify-center cursor-pointer transition-all"
+                  title="Mundur 1.5m"
+                >
+                  ◀
+                </button>
+                <button
+                  onClick={() => setVehicleZPos(Math.min(15, Math.round((vehicleZPos + 1.5) * 10) / 10))}
+                  className="w-7 h-7 rounded-xl bg-pink-100 hover:bg-pink-200 active:scale-90 text-pink-700 font-black text-xs flex items-center justify-center cursor-pointer transition-all"
+                  title="Maju 1.5m"
+                >
+                  ▶
+                </button>
+              </div>
+
+              <div className="text-[11px] font-black text-slate-700 flex items-center gap-1">
+                <span>Pos:</span>
+                <span className="text-purple-700 font-mono">
+                  {vehicleZPos >= -0.5 && vehicleZPos <= 0.5 ? 'Di Palang' : `${vehicleZPos.toFixed(1)}m`}
+                </span>
+                <span className="text-slate-400 text-[10px] font-semibold">
+                  ({loop1Active ? 'L1 🚙' : loop2Active ? 'L2 ✨' : 'Jalan'})
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={handleResetSimulation}
+                  className="text-[10px] font-black text-slate-500 hover:text-pink-600 px-2.5 py-1 bg-slate-100/90 rounded-lg cursor-pointer active:scale-95"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            {/* Core Action Buttons Dock */}
+            <div className="flex items-center gap-2 pointer-events-auto">
+              <button
+                onClick={handleTapRfidCard}
+                className="flex-1 py-2.5 px-3 bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 text-white text-xs font-black rounded-2xl shadow-lg shadow-pink-300/40 active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <span>💳 Tap {selectedCard.type}</span>
+              </button>
+
+              <button
+                onClick={startAutoSimulation}
+                disabled={isSimulating}
+                className={`py-2.5 px-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-black rounded-2xl shadow-md shadow-emerald-200/50 active:scale-95 flex items-center justify-center gap-1 cursor-pointer ${
+                  isSimulating ? 'opacity-60' : ''
+                }`}
+                title="Simulasi Mobil Lewat Otomatis"
+              >
+                <span>{isSimulating ? 'Melintas...' : '✨ Auto Demo'}</span>
+              </button>
+
+              <button
+                onClick={() => setIsMobileSheetOpen(true)}
+                className="py-2.5 px-3 bg-white/95 backdrop-blur-md border border-purple-200 text-purple-700 text-xs font-black rounded-2xl shadow-md active:scale-95 flex items-center justify-center gap-1 cursor-pointer hover:bg-purple-50"
+                title="Buka Pengaturan Lengkap"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Opsi</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Right: Interactive Control Deck (4 Columns on desktop) */}
-        <div className="lg:col-span-4 h-full overflow-hidden">
+        {/* Right: Interactive Control Deck (Desktop only, 4 Columns) */}
+        <div className="hidden lg:block lg:col-span-4 h-full overflow-hidden">
           <ControlPanel
             vehicleZPos={vehicleZPos}
             setVehicleZPos={setVehicleZPos}
@@ -562,6 +681,8 @@ export default function App() {
             rfidCards={rfidCards}
             gateState={gateState}
             gateAngle={gateAngle}
+            trafficLightMode={trafficLightMode}
+            setTrafficLightMode={setTrafficLightMode}
             cameraPreset={cameraPreset}
             setCameraPreset={setCameraPreset}
             environmentMode={environmentMode}
@@ -579,27 +700,104 @@ export default function App() {
         </div>
       </div>
 
+      {/* Mobile Slide-Up Bottom Sheet for Detailed Settings, Vehicle & Card Selector */}
+      {isMobileSheetOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex flex-col justify-end bg-black/45 backdrop-blur-xs">
+          {/* Backdrop Click */}
+          <div
+            className="absolute inset-0"
+            onClick={() => setIsMobileSheetOpen(false)}
+          />
+
+          {/* Sheet Modal Container */}
+          <div className="relative bg-white rounded-t-3xl shadow-2xl max-h-[85vh] flex flex-col overflow-hidden border-t border-pink-200 z-10">
+            {/* Sheet Header */}
+            <div className="pt-2.5 pb-2 px-4 border-b border-pink-100 flex items-center justify-between bg-gradient-to-r from-pink-50/80 to-purple-50/80 shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center font-black text-xs">
+                  🎛️
+                </div>
+                <div>
+                  <h3 className="text-xs font-black text-slate-800 leading-tight">Pengaturan & Kartu RFID</h3>
+                  <p className="text-[10px] text-slate-500 leading-tight">Pilih kendaraan, ganti kartu, dan opsi palang</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsMobileSheetOpen(false)}
+                className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold active:scale-90 cursor-pointer"
+                title="Tutup Panel"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Scrollable Control Panel inside Bottom Sheet */}
+            <div className="flex-1 overflow-y-auto p-2">
+              <ControlPanel
+                vehicleZPos={vehicleZPos}
+                setVehicleZPos={setVehicleZPos}
+                vehicleType={vehicleType}
+                setVehicleType={setVehicleType}
+                selectedCard={selectedCard}
+                setSelectedCard={setSelectedCard}
+                rfidCards={rfidCards}
+                gateState={gateState}
+                gateAngle={gateAngle}
+                trafficLightMode={trafficLightMode}
+                setTrafficLightMode={setTrafficLightMode}
+                cameraPreset={cameraPreset}
+                setCameraPreset={setCameraPreset}
+                environmentMode={environmentMode}
+                setEnvironmentMode={setEnvironmentMode}
+                config={config}
+                setConfig={setConfig}
+                isSimulating={isSimulating}
+                onStartAutoSimulation={() => {
+                  startAutoSimulation();
+                  setIsMobileSheetOpen(false);
+                }}
+                onResetSimulation={handleResetSimulation}
+                onTapRfidCard={() => {
+                  handleTapRfidCard();
+                  setIsMobileSheetOpen(false);
+                }}
+                onEmergencyToggleGate={handleEmergencyToggleGate}
+                onOpenLoopInfoModal={() => setIsInfoModalOpen(true)}
+                onOpenArduinoModal={() => setIsArduinoModalOpen(true)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Educational & Firmware Modals */}
       <LoopDetectorInfoModal isOpen={isInfoModalOpen} onClose={() => setIsInfoModalOpen(false)} />
       <ArduinoCodeModal isOpen={isArduinoModalOpen} onClose={() => setIsArduinoModalOpen(false)} />
 
-      {/* Geometric Balance Footer Bar */}
-      <footer className="h-10 border-t border-slate-800 bg-slate-900 flex items-center justify-between px-6 text-[10px] tracking-widest text-slate-500 uppercase font-mono shrink-0">
-        <div className="flex items-center gap-6">
-          <span className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-            Network: Stable
+      {/* Cute Colorful Footer Bar - Hidden on mobile for maximum 3D view */}
+      <footer className="hidden lg:flex h-8 sm:h-9 border-t border-pink-150 bg-white/95 backdrop-blur-md items-center justify-between px-3 sm:px-6 text-[10px] sm:text-[11px] font-bold text-slate-600 shrink-0 shadow-xs">
+        <div className="flex items-center gap-2.5 sm:gap-6">
+          <span className="flex items-center gap-1 text-pink-600">
+            <span className="w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse" />
+            <span>🌸 Siaga</span>
           </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            Database: Connected
+          <span className="flex items-center gap-1 text-emerald-600">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span>Dual Loop Ready</span>
           </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-            Sensor Node: 04-A
+          <span className="flex items-center gap-1 text-purple-600">
+            <span className="w-2 h-2 rounded-full bg-purple-500" />
+            <span>💳 13.56 MHz RFID</span>
+          </span>
+          <span className="flex items-center gap-1 text-sky-600">
+            <span className="w-2 h-2 rounded-full bg-sky-500" />
+            <span>🚙 Honda HR-V 3D</span>
           </span>
         </div>
-        <div>Terminal ID: BJM-S122-PRO</div>
+        <div className="text-slate-400 font-bold text-[9px] sm:text-[10px] flex items-center gap-1">
+          <span className="text-pink-500">💖</span>
+          <span>SmartGate 3D Cute & Ceria</span>
+        </div>
       </footer>
     </div>
   );

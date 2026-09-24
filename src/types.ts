@@ -31,9 +31,21 @@ export interface TelemetryEvent {
   details?: string;
 }
 
-export type CameraPreset = 'orbit' | 'driver' | 'scanner' | 'top' | 'gate';
+export type CameraPreset =
+  | 'orbit'
+  | 'driver'
+  | 'cockpit'
+  | 'scanner'
+  | 'alpr'
+  | 'cctv'
+  | 'cinematic'
+  | 'wheel'
+  | 'top'
+  | 'gate';
 
 export type EnvironmentSetting = 'day' | 'sunset' | 'night';
+
+export type RenderQuality = 'high_fps' | 'balanced' | 'ultra';
 
 export interface SystemConfig {
   gateSpeedSec: number; // 0.8s to 3.0s

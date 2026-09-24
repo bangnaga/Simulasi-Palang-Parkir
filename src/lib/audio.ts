@@ -154,6 +154,124 @@ class SoundController {
       osc.stop(now + 0.35);
     } catch {}
   }
+
+  // Pleasant chime when vehicle successfully enters or exits parking area
+  public playEntryExitChime(isEntering: boolean) {
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      if (isEntering) {
+        // Ascending triumphant chime (C5 -> E5 -> G5 -> C6)
+        osc.frequency.setValueAtTime(523.25, now);       // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+        osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+        osc.frequency.setValueAtTime(1046.50, now + 0.24); // C6
+      } else {
+        // Descending pleasant goodbye chime (C6 -> G5 -> E5 -> C5)
+        osc.frequency.setValueAtTime(1046.50, now);      // C6
+        osc.frequency.setValueAtTime(783.99, now + 0.08); // G5
+        osc.frequency.setValueAtTime(659.25, now + 0.16); // E5
+        osc.frequency.setValueAtTime(523.25, now + 0.24); // C5
+      }
+
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.45);
+    } catch {}
+  }
+
+  // Continuous engine hum / rumble when vehicle is moving
+  private engineOsc: OscillatorNode | null = null;
+  private engineGain: GainNode | null = null;
+  private engineFilter: BiquadFilterNode | null = null;
+
+  public startEngineSound() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    if (this.engineOsc) return; // already running
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(55, now); // Low engine idle rumble
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(220, now);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.04, now + 0.2); // subtle engine hum
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+
+      this.engineOsc = osc;
+      this.engineGain = gain;
+      this.engineFilter = filter;
+    } catch {}
+  }
+
+  public updateEnginePitch(speed: number) {
+    const ctx = this.getContext();
+    if (!ctx || !this.engineOsc || !this.engineFilter) return;
+
+    try {
+      const now = ctx.currentTime;
+      // speed ranges e.g. 0 to 5 or velocity magnitude
+      const targetFreq = 50 + Math.min(Math.abs(speed) * 18, 120);
+      const targetFilterFreq = 200 + Math.min(Math.abs(speed) * 80, 500);
+
+      this.engineOsc.frequency.setTargetAtTime(targetFreq, now, 0.1);
+      this.engineFilter.frequency.setTargetAtTime(targetFilterFreq, now, 0.1);
+    } catch {}
+  }
+
+  public stopEngineSound() {
+    if (this.engineOsc) {
+      try {
+        const ctx = this.getContext();
+        if (ctx && this.engineGain) {
+          const now = ctx.currentTime;
+          this.engineGain.gain.linearRampToValueAtTime(0.001, now + 0.15);
+          setTimeout(() => {
+            try {
+              this.engineOsc?.stop();
+              this.engineOsc?.disconnect();
+            } catch {}
+            this.engineOsc = null;
+            this.engineGain = null;
+            this.engineFilter = null;
+          }, 160);
+        } else {
+          this.engineOsc.stop();
+          this.engineOsc.disconnect();
+          this.engineOsc = null;
+          this.engineGain = null;
+          this.engineFilter = null;
+        }
+      } catch {
+        this.engineOsc = null;
+        this.engineGain = null;
+        this.engineFilter = null;
+      }
+    }
+  }
 }
 
 export const soundManager = new SoundController();
