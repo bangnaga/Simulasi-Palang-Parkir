@@ -249,44 +249,6 @@ export const Barrier3DCanvas: React.FC<Barrier3DCanvasProps> = ({
           </span>
         </div>
 
-        {/* 3D Performance / High FPS Switcher (Desktop only) */}
-        <div className="hidden sm:flex items-center bg-white/95 backdrop-blur-md border border-pink-200/80 p-0.5 rounded-2xl shadow-sm pointer-events-auto">
-          <button
-            onClick={() => handleQualityChange('high_fps')}
-            className={`px-2.5 py-1 text-[10px] font-black rounded-xl transition-all flex items-center gap-1 cursor-pointer ${
-              renderQuality === 'high_fps'
-                ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-xs'
-                : 'text-slate-500 hover:text-pink-600'
-            }`}
-            title="Max FPS (Super smooth animation)"
-          >
-            <Zap className="w-3 h-3" />
-            <span>High FPS</span>
-          </button>
-          <button
-            onClick={() => handleQualityChange('balanced')}
-            className={`px-2.5 py-1 text-[10px] font-black rounded-xl transition-all cursor-pointer ${
-              renderQuality === 'balanced'
-                ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-xs'
-                : 'text-slate-500 hover:text-pink-600'
-            }`}
-            title="Balanced (Medium Quality)"
-          >
-            Balanced
-          </button>
-          <button
-            onClick={() => handleQualityChange('ultra')}
-            className={`px-2.5 py-1 text-[10px] font-black rounded-xl transition-all cursor-pointer ${
-              renderQuality === 'ultra'
-                ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-xs'
-                : 'text-slate-500 hover:text-pink-600'
-            }`}
-            title="Ultra (Highest Quality Shadows & Bloom)"
-          >
-            Ultra ✨
-          </button>
-        </div>
-
         {/* Camera Preset Quick Selector Dock */}
         {setCameraPreset && (
           <div className="flex items-center bg-white/90 backdrop-blur-md border border-indigo-200/80 p-0.5 rounded-xl sm:rounded-2xl shadow-2xs pointer-events-auto overflow-x-auto max-w-[calc(100vw-110px)] sm:max-w-none">
@@ -366,8 +328,8 @@ export const Barrier3DCanvas: React.FC<Barrier3DCanvasProps> = ({
           <span>Sudut: <strong className="text-rose-600">{gateAngle.toFixed(0)}°</strong></span>
           <span className="text-slate-300">•</span>
           <span className="flex items-center gap-1">
-            <span className={`w-1.5 h-1.5 rounded-full ${isRedTopOn ? 'bg-rose-500 shadow-[0_0_4px_#f43f5e]' : isGreenBottomOn ? 'bg-emerald-500 shadow-[0_0_4px_#10b981]' : 'bg-slate-400'}`} />
-            <span>{isRedTopOn ? 'Merah Atas' : isGreenBottomOn ? 'Hijau Bawah' : 'Off All'}</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+            <span>Sistem Gate</span>
           </span>
         </div>
       </div>
@@ -377,18 +339,10 @@ export const Barrier3DCanvas: React.FC<Barrier3DCanvasProps> = ({
         {/* Card 1: Gate Angle & Traffic Signal State */}
         <div className="bg-white/95 backdrop-blur-md border-l-4 border-rose-500 border-t border-r border-b border-pink-100 p-3 rounded-2xl shadow-md">
           <div className="text-[10px] font-black uppercase text-slate-500 flex items-center justify-between">
-            <span>Sudut & Lampu</span>
-            {/* Visual Dual Aspect Lamp (Red top, Green bottom) */}
-            <div className="flex items-center gap-1 bg-slate-900 px-1.5 py-0.5 rounded-lg border border-slate-700">
-              <span className={`w-2 h-2 rounded-full transition-all ${isRedTopOn ? 'bg-rose-500 shadow-[0_0_8px_#f43f5e]' : 'bg-rose-950/60'}`} title="Merah Atas" />
-              <span className={`w-2 h-2 rounded-full transition-all ${isGreenBottomOn ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'bg-emerald-950/60'}`} title="Hijau Bawah" />
-            </div>
+            <span>Sudut Gate</span>
           </div>
           <div className="flex items-baseline justify-between mt-0.5">
             <span className="text-xl font-black text-rose-600">{gateAngle.toFixed(1)}°</span>
-            <span className="text-[10px] font-extrabold text-slate-600">
-              {isRedTopOn ? '🔴 Merah Atas' : isGreenBottomOn ? '🟢 Hijau Bawah' : '📴 Off All'}
-            </span>
           </div>
           <div className="w-full bg-pink-100 h-2 mt-1.5 rounded-full overflow-hidden">
             <div className="bg-gradient-to-r from-rose-500 to-pink-500 h-full transition-all duration-150 rounded-full" style={{ width: `${(gateAngle / 90) * 100}%` }} />

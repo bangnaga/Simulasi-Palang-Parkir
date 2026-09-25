@@ -17,6 +17,7 @@ import { Barrier3DCanvas } from './components/Barrier3DCanvas';
 import { ControlPanel } from './components/ControlPanel';
 import { LoopDetectorInfoModal } from './components/LoopDetectorInfoModal';
 import { ArduinoCodeModal } from './components/ArduinoCodeModal';
+import { EducationPanel } from './components/EducationPanel';
 
 // Sample Cheerful RFID Cards
 const INITIAL_RFID_CARDS: RfidCard[] = [
@@ -112,6 +113,7 @@ export default function App() {
   const [isInfoModalOpen, setIsInfoModalOpen] = useState<boolean>(false);
   const [isArduinoModalOpen, setIsArduinoModalOpen] = useState<boolean>(false);
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState<boolean>(false);
+  const [sidebarTab, setSidebarTab] = useState<'simulator' | 'edukasi'>('simulator');
 
   const [config, setConfig] = useState<SystemConfig>({
     gateSpeedSec: 1.5,
@@ -671,32 +673,65 @@ export default function App() {
 
         {/* Right: Interactive Control Deck (Desktop only, 4 Columns) */}
         <div className="hidden lg:block lg:col-span-4 h-full overflow-hidden">
-          <ControlPanel
-            vehicleZPos={vehicleZPos}
-            setVehicleZPos={setVehicleZPos}
-            vehicleType={vehicleType}
-            setVehicleType={setVehicleType}
-            selectedCard={selectedCard}
-            setSelectedCard={setSelectedCard}
-            rfidCards={rfidCards}
-            gateState={gateState}
-            gateAngle={gateAngle}
-            trafficLightMode={trafficLightMode}
-            setTrafficLightMode={setTrafficLightMode}
-            cameraPreset={cameraPreset}
-            setCameraPreset={setCameraPreset}
-            environmentMode={environmentMode}
-            setEnvironmentMode={setEnvironmentMode}
-            config={config}
-            setConfig={setConfig}
-            isSimulating={isSimulating}
-            onStartAutoSimulation={startAutoSimulation}
-            onResetSimulation={handleResetSimulation}
-            onTapRfidCard={handleTapRfidCard}
-            onEmergencyToggleGate={handleEmergencyToggleGate}
-            onOpenLoopInfoModal={() => setIsInfoModalOpen(true)}
-            onOpenArduinoModal={() => setIsArduinoModalOpen(true)}
-          />
+          <div className="flex flex-col h-full overflow-hidden bg-white/95 border border-pink-100 rounded-3xl shadow-sm hover:shadow-md transition-all">
+            {/* Switcher Header Tabs */}
+            <div className="flex bg-slate-50 border-b border-pink-100/70 p-1.5 shrink-0">
+              <button
+                onClick={() => setSidebarTab('simulator')}
+                className={`flex-1 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  sidebarTab === 'simulator'
+                    ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
+                }`}
+              >
+                <span>🎮</span>
+                <span>Simulator</span>
+              </button>
+              <button
+                onClick={() => setSidebarTab('edukasi')}
+                className={`flex-1 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  sidebarTab === 'edukasi'
+                    ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
+                }`}
+              >
+                <span>📚</span>
+                <span>Belajar IoT</span>
+              </button>
+            </div>
+
+            {/* Tab Content Area */}
+            <div className="flex-1 overflow-hidden">
+              {sidebarTab === 'simulator' ? (
+                <ControlPanel
+                  vehicleZPos={vehicleZPos}
+                  setVehicleZPos={setVehicleZPos}
+                  vehicleType={vehicleType}
+                  setVehicleType={setVehicleType}
+                  selectedCard={selectedCard}
+                  setSelectedCard={setSelectedCard}
+                  rfidCards={rfidCards}
+                  gateState={gateState}
+                  gateAngle={gateAngle}
+                  cameraPreset={cameraPreset}
+                  setCameraPreset={setCameraPreset}
+                  environmentMode={environmentMode}
+                  setEnvironmentMode={setEnvironmentMode}
+                  config={config}
+                  setConfig={setConfig}
+                  isSimulating={isSimulating}
+                  onStartAutoSimulation={autoSimulation => startAutoSimulation()}
+                  onResetSimulation={handleResetSimulation}
+                  onTapRfidCard={handleTapRfidCard}
+                  onEmergencyToggleGate={handleEmergencyToggleGate}
+                  onOpenLoopInfoModal={() => setIsInfoModalOpen(true)}
+                  onOpenArduinoModal={() => setIsArduinoModalOpen(true)}
+                />
+              ) : (
+                <EducationPanel onOpenArduinoModal={() => setIsArduinoModalOpen(true)} />
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -718,8 +753,8 @@ export default function App() {
                   🎛️
                 </div>
                 <div>
-                  <h3 className="text-xs font-black text-slate-800 leading-tight">Pengaturan & Kartu RFID</h3>
-                  <p className="text-[10px] text-slate-500 leading-tight">Pilih kendaraan, ganti kartu, dan opsi palang</p>
+                  <h3 className="text-xs font-black text-slate-800 leading-tight">Pengaturan & Belajar IoT</h3>
+                  <p className="text-[10px] text-slate-500 leading-tight">Simulator interaktif, wiring, kuis, dan teori</p>
                 </div>
               </div>
               <button
@@ -731,40 +766,73 @@ export default function App() {
               </button>
             </div>
 
-            {/* Scrollable Control Panel inside Bottom Sheet */}
-            <div className="flex-1 overflow-y-auto p-2">
-              <ControlPanel
-                vehicleZPos={vehicleZPos}
-                setVehicleZPos={setVehicleZPos}
-                vehicleType={vehicleType}
-                setVehicleType={setVehicleType}
-                selectedCard={selectedCard}
-                setSelectedCard={setSelectedCard}
-                rfidCards={rfidCards}
-                gateState={gateState}
-                gateAngle={gateAngle}
-                trafficLightMode={trafficLightMode}
-                setTrafficLightMode={setTrafficLightMode}
-                cameraPreset={cameraPreset}
-                setCameraPreset={setCameraPreset}
-                environmentMode={environmentMode}
-                setEnvironmentMode={setEnvironmentMode}
-                config={config}
-                setConfig={setConfig}
-                isSimulating={isSimulating}
-                onStartAutoSimulation={() => {
-                  startAutoSimulation();
+            {/* Mobile Switcher Header Tabs */}
+            <div className="flex bg-slate-50 border-b border-pink-100/50 p-1 shrink-0">
+              <button
+                onClick={() => setSidebarTab('simulator')}
+                className={`flex-1 py-1.5 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                  sidebarTab === 'simulator'
+                    ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-xs'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <span>🎮</span>
+                <span>Simulator</span>
+              </button>
+              <button
+                onClick={() => setSidebarTab('edukasi')}
+                className={`flex-1 py-1.5 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                  sidebarTab === 'edukasi'
+                    ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-xs'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <span>📚</span>
+                <span>Belajar IoT</span>
+              </button>
+            </div>
+
+            {/* Scrollable Panel Content inside Bottom Sheet */}
+            <div className="flex-1 overflow-y-auto">
+              {sidebarTab === 'simulator' ? (
+                <div className="p-2">
+                  <ControlPanel
+                    vehicleZPos={vehicleZPos}
+                    setVehicleZPos={setVehicleZPos}
+                    vehicleType={vehicleType}
+                    setVehicleType={setVehicleType}
+                    selectedCard={selectedCard}
+                    setSelectedCard={setSelectedCard}
+                    rfidCards={rfidCards}
+                    gateState={gateState}
+                    gateAngle={gateAngle}
+                    cameraPreset={cameraPreset}
+                    setCameraPreset={setCameraPreset}
+                    environmentMode={environmentMode}
+                    setEnvironmentMode={setEnvironmentMode}
+                    config={config}
+                    setConfig={setConfig}
+                    isSimulating={isSimulating}
+                    onStartAutoSimulation={() => {
+                      startAutoSimulation();
+                      setIsMobileSheetOpen(false);
+                    }}
+                    onResetSimulation={handleResetSimulation}
+                    onTapRfidCard={() => {
+                      handleTapRfidCard();
+                      setIsMobileSheetOpen(false);
+                    }}
+                    onEmergencyToggleGate={handleEmergencyToggleGate}
+                    onOpenLoopInfoModal={() => setIsInfoModalOpen(true)}
+                    onOpenArduinoModal={() => setIsArduinoModalOpen(true)}
+                  />
+                </div>
+              ) : (
+                <EducationPanel onOpenArduinoModal={() => {
+                  setIsArduinoModalOpen(true);
                   setIsMobileSheetOpen(false);
-                }}
-                onResetSimulation={handleResetSimulation}
-                onTapRfidCard={() => {
-                  handleTapRfidCard();
-                  setIsMobileSheetOpen(false);
-                }}
-                onEmergencyToggleGate={handleEmergencyToggleGate}
-                onOpenLoopInfoModal={() => setIsInfoModalOpen(true)}
-                onOpenArduinoModal={() => setIsArduinoModalOpen(true)}
-              />
+                }} />
+              )}
             </div>
           </div>
         </div>
